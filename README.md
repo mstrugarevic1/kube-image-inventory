@@ -1,97 +1,52 @@
 # Kubernetes Image Inventory
 
-Kubernetes Image Inventory is a small read-only web UI that lists container images currently running in a Kubernetes cluster.
+A Python CLI and web-based tool for inspecting Kubernetes workloads and reporting container images used across a cluster.
 
-![Kubernetes Image Inventory](examples/screenshot.png)
+## Purpose
 
-> [!IMPORTANT]
-> **Disclaimer:** This is a **pet project** and a **minimum viable product (MVP)**. 
-> This software is provided "as is", without warranty of any kind. Use at your own risk.
+`kube-image-inventory` provides a consolidated view of all container images running in your Kubernetes cluster, helping platform teams track image versions, freshness, and security posture.
 
-## Current Functionality
+## Key Features
 
-- **Cluster Inventory**: Lists all workloads (Deployments, StatefulSets, DaemonSets, etc.) and their container images.
-- **Image Freshness**: Checks if a newer tag is available in the registry (supports Docker Hub, GHCR, etc.).
-- **Vulnerability Scanning**: Displays CVE counts if Trivy Operator is present in the cluster.
-- **Read-Only**: Requires only read permissions for Kubernetes resources.
+- **Cluster-wide Inventory**: Automatically discovers images across all namespaces and workload types.
+- **Image Freshness**: Identifies when newer tags are available in the registry.
+- **Vulnerability Reporting**: Integrates with Trivy Operator (if present) to display CVE counts.
+- **CI/CD Integration**: Includes GitHub Actions for linting and testing.
 
-## Requirements
+## Tech Stack
+
+- **Python 3.11**: Core logic and CLI.
+- **Kubernetes Client**: Direct interaction with the cluster API.
+- **Docker**: For containerized execution.
+- **GitHub Actions**: Automated CI workflow with dependency caching.
+
+## Getting Started
+
+### Prerequisites
 
 - Python 3.11+
-- Access to a Kubernetes cluster (local or remote)
-- Docker (optional, for containerized execution)
+- A valid `~/.kube/config` with read access to the cluster.
 
-## Local Execution
-
-1. Clone the repository.
-2. Install dependencies:
-   ```bash
-   make install
-   ```
-3. Run the application:
-   ```bash
-   make run
-   ```
-   *Note: This will use your local `~/.kube/config` by default.*
-
-## Docker Execution
-
-1. Build the image:
-   ```bash
-   make build
-   ```
-2. Run the container:
-   ```bash
-   docker run --rm -p 8000:8000 \
-     -v ~/.kube:/home/appuser/.kube:ro \
-     -e KUBE_IMAGE_INVENTORY_DEV_KUBECONFIG=true \
-     kube-image-inventory
-   ```
-
-## Kubernetes Deployment
-
-Deploy using Kustomize:
+### Local Installation
 
 ```bash
-make deploy
+# Install dependencies
+pip install .[dev]
+
+# Run tests
+pytest
 ```
 
-This will create:
-- A dedicated `kube-image-inventory` namespace.
-- A ServiceAccount with read-only RBAC permissions.
-- A Deployment and Service.
+## Repository Structure
 
-Access the UI using port-forwarding:
+- `app/`: Main application logic.
+- `deploy/`: Kubernetes manifests for cluster deployment.
+- `.github/workflows/`: CI/CD configuration.
+- `tests/`: Automated test suite.
 
-```bash
-make port-forward
-```
+## Usage
 
-## Configuration
+Refer to the inline help for CLI usage or the `Makefile` for common tasks like building images and running local scans.
 
-| Environment Variable | Default | Description |
-|----------------------|---------|-------------|
-| `DATABASE_URL` | `sqlite:///./inventory.db` | SQLite database location. |
-| `KUBE_IMAGE_INVENTORY_DEV_KUBECONFIG` | `false` | Enable local kubeconfig when running outside the cluster. |
-| `SCAN_INTERVAL_SECONDS` | `900` | Background scan interval in seconds. |
-
-## Kubernetes RBAC
-
-The application requires `get`, `list`, and `watch` permissions for:
-- `pods`, `namespaces`, `nodes`
-- `deployments`, `statefulsets`, `daemonsets`, `replicasets` (apps)
-- `jobs`, `cronjobs` (batch)
-- `vulnerabilityreports` (aquasecurity.github.io, optional)
-
-## Security Limitations
-
-> [!WARNING]
-> The application does not provide built-in authentication.
-> Do not expose it publicly without external access control (e.g., VPN, IAP, or Reverse Proxy with Auth).
-
-## Known Limitations
-
-- **Registry Rate Limits**: Heavy scanning may trigger rate limits on public registries (e.g., Docker Hub).
-- **In-Memory Cache**: Restarts will trigger a fresh scan of the cluster and registries.
-- **Trivy Integration**: Relies on Trivy Operator being installed in the cluster for CVE data.
-
+> [!NOTE]
+> This is a portfolio project demonstrating Kubernetes integration and Python tooling. It is not intended for high-security production environments without additional access controls.
