@@ -1,0 +1,20 @@
+# Explicit allowlist of kubeconfig contexts this application is permitted to scan.
+#
+# Only contexts listed here are ever used - the application never enumerates or
+# scans every context found in your kubeconfig. Copy this file to
+# config/clusters.yaml (or point CLUSTERS_CONFIG_PATH at your own copy) and set
+# KUBE_ACCESS_MODE=multicontext (or leave it on "auto" - auto mode uses this
+# file automatically if in-cluster credentials are not available).
+
+clusters:
+  - id: kind-dev
+    name: Kind Development
+    context: kind-kii-dev
+    environment: development
+    enabled: true
+
+  - id: kind-prod
+    name: Kind Production
+    context: kind-kii-prod
+    environment: production
+    enabled: true
