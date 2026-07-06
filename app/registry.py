@@ -33,7 +33,7 @@ async def get_latest_tag(repository: str) -> Optional[str]:
             v = version.parse(t)
             if not v.is_prerelease:
                 semver_tags.append((v, t))
-        except:
+        except Exception:
             continue
     
     if not semver_tags:
@@ -103,6 +103,6 @@ def compare_tags(current: str, latest: str) -> str:
     try:
         if version.parse(current) < version.parse(latest):
             return "outdated"
-    except:
+    except Exception:
         pass
     return "unknown"
