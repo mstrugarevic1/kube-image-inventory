@@ -6,6 +6,7 @@ __pycache__/
 .ruff_cache/
 venv/
 .venv/
+*.egg-info/
 
 # Database
 *.db
@@ -14,6 +15,11 @@ venv/
 .env
 .kubeconfig
 .kube/
+kubeconfig*
+*.kubeconfig
+
+# Cluster configuration (may reference private context names / infra layout)
+config/clusters.yaml
 
 # OS
 .DS_Store
