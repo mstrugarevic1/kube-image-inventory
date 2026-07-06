@@ -43,3 +43,8 @@ spec:
           env:
             - name: DATABASE_URL
               value: "sqlite:///./inventory.db"
+            # In-cluster mode: scans only the cluster this Deployment runs in,
+            # using the mounted ServiceAccount token. See README.md for the
+            # multi-context alternative (requires mounting a trusted kubeconfig).
+            - name: KUBE_ACCESS_MODE
+              value: "incluster"

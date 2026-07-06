@@ -143,6 +143,64 @@ body {
     flex-wrap: wrap;
 }
 
+.cluster-toolbar {
+    margin-bottom: 20px;
+}
+
+.cluster-select-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cluster-select-form label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.cluster-select-form select {
+    padding: 6px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: white;
+    color: var(--text-color);
+}
+
+.section-heading {
+    margin: 28px 0 12px 0;
+}
+
+.section-heading h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.notice {
+    padding: 10px 16px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    font-size: 14px;
+}
+
+.notice-info {
+    background-color: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.error-cell {
+    max-width: 320px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--danger-text);
+    font-size: 13px;
+}
+
+.col-cluster { width: 140px; }
+
 .search-input {
     width: 320px;
     padding: 8px 12px;
@@ -239,6 +297,11 @@ tbody tr:hover {
 .badge-outdated { background-color: var(--danger-bg); color: var(--danger-text); }
 .badge-unknown { background-color: var(--gray-bg); color: var(--gray-text); }
 .badge-error { background-color: var(--danger-bg); color: var(--danger-text); }
+
+.badge-cluster-healthy { background-color: var(--success-bg); color: var(--success-text); }
+.badge-cluster-stale { background-color: var(--warning-bg); color: var(--warning-text); }
+.badge-cluster-unreachable { background-color: var(--danger-bg); color: var(--danger-text); }
+.badge-cluster-unknown { background-color: var(--gray-bg); color: var(--gray-text); }
 
 .cve-badge-group {
     display: inline-flex;

@@ -1,6 +1,20 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="table-toolbar cluster-toolbar">
+    <div class="toolbar-left">
+        <form method="get" action="/" id="cluster-form" class="cluster-select-form">
+            <label for="cluster-select">Cluster</label>
+            <select name="cluster" id="cluster-select" onchange="this.form.submit()">
+                <option value="all" {% if selected_cluster == 'all' %}selected{% endif %}>All clusters</option>
+                {% for c in clusters %}
+                <option value="{{ c.id }}" {% if selected_cluster == c.id %}selected{% endif %}>{{ c.name }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+</div>
+
 <section class="summary-cards">
     <div class="card">
         <h3>Workloads</h3>
@@ -28,6 +42,72 @@
     </div>
 </section>
 
+<div class="section-heading">
+    <h2>Cluster Status</h2>
+</div>
+<div class="inventory-table-wrapper cluster-status-wrapper">
+    <div class="inventory-table-scroll">
+        <table id="cluster-status-table">
+            <thead>
+                <tr>
+                    <th>Cluster</th>
+                    <th>Environment</th>
+                    <th>Status</th>
+                    <th>Last Successful Scan</th>
+                    <th>Last Error</th>
+                    <th>Workloads</th>
+                    <th>Images</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in cluster_status_rows %}
+                <tr>
+                    <td><strong>{{ row.name }}</strong></td>
+                    <td>{{ row.environment }}</td>
+                    <td><span class="badge badge-cluster-{{ row.status }}">{{ row.status }}</span></td>
+                    <td>{{ row.last_successful_scan_at.strftime('%Y-%m-%d %H:%M:%S') if row.last_successful_scan_at else 'Never' }}</td>
+                    <td class="error-cell" title="{{ row.last_error or '' }}">{{ row.last_error or '-' }}</td>
+                    <td>{{ row.workload_count }}</td>
+                    <td>{{ row.image_count }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7">No clusters configured yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if image_drift %}
+<div class="section-heading">
+    <h2>Image Drift</h2>
+</div>
+<div class="inventory-table-wrapper image-drift-wrapper">
+    <div class="inventory-table-scroll">
+        <table id="image-drift-table">
+            <thead>
+                <tr>
+                    <th>Repository</th>
+                    {% for c in drift_clusters %}
+                    <th>{{ c.name }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in image_drift %}
+                <tr>
+                    <td class="image-cell" title="{{ row.repository }}">{{ row.repository }}</td>
+                    {% for c in drift_clusters %}
+                    <td><code>{{ row.tags_by_cluster.get(c.id, '-') }}</code></td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
 <div class="table-toolbar">
     <div class="toolbar-left">
         <input type="text" id="inventory-search" class="search-input" placeholder="Search workloads, images, or namespaces">
@@ -44,6 +124,9 @@
         <table id="inventory-table">
             <thead>
                 <tr>
+                    {% if show_cluster_column %}
+                    <th class="col-cluster">Cluster</th>
+                    {% endif %}
                     <th class="col-ns">Namespace</th>
                     <th class="col-workload">Workload</th>
                     <th class="col-kind">Kind</th>
@@ -60,6 +143,9 @@
                 {% for workload in workloads %}
                     {% for container in workload.containers %}
                     <tr class="inventory-row">
+                        {% if show_cluster_column %}
+                        <td class="col-cluster">{{ workload.cluster.name if workload.cluster else workload.cluster_id }}</td>
+                        {% endif %}
                         <td class="col-ns">{{ workload.namespace }}</td>
                         <td class="col-workload"><strong>{{ workload.name }}</strong></td>
                         <td class="col-kind">{{ workload.kind }}</td>
@@ -94,7 +180,7 @@
     document.getElementById('inventory-search').addEventListener('input', function() {
         const query = this.value.toLowerCase();
         const rows = document.querySelectorAll('.inventory-row');
-        
+
         rows.forEach(row => {
             const text = row.textContent.toLowerCase();
             row.style.display = text.includes(query) ? '' : 'none';
