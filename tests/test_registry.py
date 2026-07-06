@@ -1,4 +1,3 @@
-import pytest
 from app.registry import compare_tags
 
 def test_identical_tags_are_current():
