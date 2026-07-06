@@ -21,15 +21,7 @@ data and registry freshness checks.
 
 ## How it works
 
-```mermaid
-flowchart LR
-    U[Platform Engineer] --> UI[Web UI]
-    UI --> APP[Kube Image Inventory]
-    CFG[Cluster configuration] --> APP
-    APP --> DEV[Kubernetes cluster: dev]
-    APP --> PROD[Kubernetes cluster: prod]
-    APP --> DB[(Inventory database)]
-```
+![Architecture](examples/architecture.png)
 
 Enabled clusters are loaded from configuration at startup and on each refresh. For every
 configured cluster the app builds an isolated Kubernetes client tied to that cluster's
