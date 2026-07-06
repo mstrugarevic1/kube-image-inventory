@@ -17,5 +17,5 @@ def get_db():
         db.close()
 
 def init_db():
-    from . import models
+    from . import models  # noqa: F401  (registers models on Base.metadata)
     Base.metadata.create_all(bind=engine)

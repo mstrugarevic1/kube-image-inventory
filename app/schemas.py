@@ -29,13 +29,14 @@ class Container(ContainerBase):
         from_attributes = True
 
 class WorkloadBase(BaseModel):
+    cluster_id: str
     namespace: str
     name: str
     kind: str
     desired_replicas: int = 0
     available_replicas: int = 0
-    labels: Dict[str, str] = {}
-    annotations: Dict[str, str] = {}
+    labels: Dict[str, str] = Field(default_factory=dict)
+    annotations: Dict[str, str] = Field(default_factory=dict)
     last_observed: datetime = Field(default_factory=datetime.utcnow)
 
 class WorkloadCreate(WorkloadBase):

@@ -1,24 +1,61 @@
-from sqlalchemy import Column, Integer, String, DateTime, JSON, ForeignKey, UniqueConstraint
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    JSON,
+    String,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from .db import Base
+
+
+class Cluster(Base):
+    __tablename__ = "clusters"
+
+    id = Column(String, primary_key=True)
+    name = Column(String, nullable=False)
+    context_name = Column(String, nullable=True)
+    environment = Column(String, nullable=False, default="unknown")
+    enabled = Column(Boolean, default=True, nullable=False)
+
+    last_scan_started_at = Column(DateTime, nullable=True)
+    last_scan_completed_at = Column(DateTime, nullable=True)
+    last_successful_scan_at = Column(DateTime, nullable=True)
+    last_error = Column(String, nullable=True)
+
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    workloads = relationship(
+        "Workload", back_populates="cluster", cascade="all, delete-orphan"
+    )
+
 
 class Workload(Base):
     __tablename__ = "workloads"
 
     id = Column(Integer, primary_key=True, index=True)
+    cluster_id = Column(String, ForeignKey("clusters.id"), nullable=False, index=True)
     namespace = Column(String, index=True)
     name = Column(String, index=True)
     kind = Column(String, index=True)
     desired_replicas = Column(Integer, default=0)
     available_replicas = Column(Integer, default=0)
-    labels = Column(JSON, default={})
-    annotations = Column(JSON, default={})
+    labels = Column(JSON, default=dict)
+    annotations = Column(JSON, default=dict)
     last_observed = Column(DateTime, default=datetime.utcnow)
 
+    cluster = relationship("Cluster", back_populates="workloads")
     containers = relationship("Container", back_populates="workload", cascade="all, delete-orphan")
 
-    __table_args__ = (UniqueConstraint('namespace', 'name', 'kind', name='_workload_uc'),)
+    __table_args__ = (
+        UniqueConstraint("cluster_id", "namespace", "name", "kind", name="_cluster_workload_uc"),
+    )
+
 
 class Container(Base):
     __tablename__ = "containers"
@@ -29,7 +66,7 @@ class Container(Base):
     image_full = Column(String)
     image_repository = Column(String)
     image_tag = Column(String)
-    
+
     # Freshness info
     current_tag = Column(String)
     latest_tag = Column(String)
@@ -46,6 +83,7 @@ class Container(Base):
     vulnerability_report_name = Column(String)
 
     workload = relationship("Workload", back_populates="containers")
+
 
 class RegistryCache(Base):
     __tablename__ = "registry_cache"
